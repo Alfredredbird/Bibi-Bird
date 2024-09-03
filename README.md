@@ -107,6 +107,8 @@ There Is A Lot Lol
  - [ ] Reports
  - [ ] XSS Injecting
  - [ ] Site OSINT
+ - [ ] Custom Wordlists
+ - [ ] Payload Generation
 
 # ⁉️ Need Help?
 Check out https://github.com/alfredredbird/Bibi-Bird/issues or the WiKi for help.

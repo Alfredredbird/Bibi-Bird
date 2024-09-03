@@ -9,6 +9,7 @@ from modules.mods import *
 url = ""
 wordlistpath = ""
 payload = 0
+delay = 3
 
 parser = argparse.ArgumentParser(
                     prog='BiBi',
@@ -21,6 +22,8 @@ parser.add_argument('-l', '--lengths', type=int, nargs=2, help='Minimum and maxi
 parser.add_argument('-w', '--wordlist')
 parser.add_argument('-i', '--inject', action='store_true', help='SQL Injection Mode')
 parser.add_argument('-p', '--payload', type=int)
+parser.add_argument('-d', '--delay', type=int)
+
 
 arg = parser.parse_args()
 
@@ -49,7 +52,6 @@ headers = {
 
 
 
-
 if arg.url is None:
     url = input("Target: ")
 else:
@@ -57,6 +59,9 @@ else:
 
 if arg.payload:
  payload = arg.payload
+
+if arg.delay:
+    delay = arg.delay
 
 if arg.wordlist:
  if arg.wordlist is None:
@@ -76,5 +81,5 @@ else:
     brute(url,driver,response)
 
    if arg.inject:
-      inject(url,driver,response,payload,wordlistpath)
+       inject(url,driver,response,wordlistpath,payload,delay)
         

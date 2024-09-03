@@ -3,7 +3,9 @@ import platform
 import socket
 import sys
 from colorama import *
-
+import json
+import os
+from datetime import datetime
 
 def logo(url,response, count=0, pwd=0):
     
@@ -66,3 +68,34 @@ def logo(url,response, count=0, pwd=0):
 ⟪                                               ⟫ 
 ⟪===============================================⟫ 
 ⟪                                               ⟫ """)
+
+
+
+
+
+
+def save_to_json(url, count):
+    filename = "data/gueses.json"
+    data = {
+        "url": url,
+        "count": count,
+        "date": datetime.now().isoformat()
+    }
+
+    # Check if the file exists
+    if os.path.exists(filename):
+        # Load existing data
+        with open(filename, "r") as file:
+            existing_data = json.load(file)
+        # Append new data
+        existing_data.append(data)
+    else:
+        # Create a new list with the first data entry
+        existing_data = [data]
+
+    # Write the updated data to the JSON file
+    with open(filename, "w") as file:
+        json.dump(existing_data, file, indent=4)
+
+# Example usage:
+
