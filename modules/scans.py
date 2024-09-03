@@ -126,7 +126,7 @@ def inject(url, driver, response, wordlist, payload, delay):
                     
                     print(create_box_line(f"  {num}.  {email}", box_width, "left"))
                     num += 1
-                    
+                
 
                 # Send keys to the password elements
                 for element in password_elements:
@@ -142,6 +142,7 @@ def inject(url, driver, response, wordlist, payload, delay):
 
                 # Check if the URL has changed (indicating a redirect)
                 current_url = driver.current_url
+                
                 if current_url != url:
                     print("⟪                                               ⟫")
                     print("⟪===============================================⟫ ")
@@ -163,7 +164,7 @@ def inject(url, driver, response, wordlist, payload, delay):
                 pass
 
 
-    print(create_box_line(f"Injection: {Fore.RED + 'Failure :(' + Fore.RESET}", 49, "left"))
+    
                         
     # Keep the browser open for 10 seconds before closing
     time.sleep(10)
