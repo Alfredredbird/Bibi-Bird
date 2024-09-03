@@ -105,6 +105,7 @@ There Is A Lot Lol
  - [x] URL Brute Forcing
  - [ ] Reports
  - [ ] XSS Injecting
+ - [ ] Site OSINT
 
 # ⁉️ Need Help?
 Check out https://github.com/alfredredbird/Bibi-Bird/issues or the WiKi for help.
