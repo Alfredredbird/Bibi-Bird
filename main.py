@@ -78,8 +78,8 @@ if response.status_code >= 400:
 else:
    
    if arg.brute:
-    brute(url,driver,response)
-
+    # brute(url,driver,response)
+    subdomain(url,driver, "dict/sec.txt")
    if arg.inject:
        inject(url,driver,response,wordlistpath,payload,delay)
         

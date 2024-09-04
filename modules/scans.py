@@ -181,3 +181,33 @@ def brute(url,driver,response):
         print(f"⟪ {i}. {url + generate_random_string(4)}: {rq.status_code}     ⟫")
         i += 1
     
+def subdomain(url, driver, wordlist):
+    
+    driver.get(url)
+    homecode = driver.page_source.strip()  # Strip whitespace from homepage code
+    
+    print("Home Page Source Captured.")
+    
+    with open(wordlist, 'r') as f:
+        lines = f.readlines()
+        
+    for line in lines:
+        line = line.strip()  # Strip whitespace from each line
+        if not line:  # Skip empty lines
+            continue
+            
+        newurl = url + "/" + line
+        
+        try:
+            driver.get(newurl)
+            domaincode = driver.page_source.strip()  # Strip whitespace from domain code
+            
+            if homecode == domaincode:
+                print("Page is the same as the homepage.")
+            else:
+                print(f"Found: {newurl}")
+                
+        except Exception as e:
+            print(f"Error accessing {newurl}: {e}")
+
+        
