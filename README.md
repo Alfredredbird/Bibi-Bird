@@ -103,12 +103,13 @@ There Is A Lot Lol
  - [x] SQL Injections
  - [ ] SQL Detections
  - [ ] DNS Scanning
- - [x] URL Brute Forcing
+ - [ ] URL Brute Forcing
  - [ ] Reports
  - [ ] XSS Injecting
  - [ ] Site OSINT
  - [ ] Custom Wordlists
  - [ ] Payload Generation
+ - [X] Payload Selection
 
 # ⁉️ Need Help?
 Check out https://github.com/alfredredbird/Bibi-Bird/issues or the WiKi for help.
