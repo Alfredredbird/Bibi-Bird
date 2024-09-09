@@ -48,10 +48,12 @@ def inject(url, driver, response, wordlist, payload, delay):
         # Find elements by ID and NAME for password inputs
         pwdel_id = driver.find_elements(By.ID, 'password')
         pwdel_name = driver.find_elements(By.NAME, 'password')
+        pwdel_type = driver.find_elements(By.XPATH, '//*[@type="password"]')
 
         # Append the WebElement objects to the list
         password_elements.extend(pwdel_id)
         password_elements.extend(pwdel_name)
+        password_elements.extend(pwdel_type)
 
         # Remove duplicates by converting to a set and then back to a list
         password_elements = list(set(password_elements))
@@ -75,8 +77,10 @@ def inject(url, driver, response, wordlist, payload, delay):
         if not email_elements:
             input_all = driver.find_elements(By.TAG_NAME, 'input')
             tagarea = driver.find_elements(By.TAG_NAME, 'textarea')
+            txtname = driver.find_elements(By.TAG_NAME, 'txtManualName')
             email_elements.extend(input_all)
             email_elements.extend(tagarea)
+            email_elements.extend(txtname)
 
     except Exception as e:
         print(f"An error occurred: {e}")
@@ -84,6 +88,7 @@ def inject(url, driver, response, wordlist, payload, delay):
     # Count the elements
     pwd = len(password_elements)
     count = len(email_elements)
+
 
     # Call the logo function
     logo(url, response, count, pwd)
@@ -138,7 +143,7 @@ def inject(url, driver, response, wordlist, payload, delay):
                 password_elements[0].send_keys(Keys.RETURN)
 
                 # Wait for the page to potentially redirect
-                time.sleep(delay)
+               
 
                 # Check if the URL has changed (indicating a redirect)
                 current_url = driver.current_url
