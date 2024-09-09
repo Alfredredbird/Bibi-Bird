@@ -1,0 +1,10 @@
+input
+textarea
+txtManualName
+Email
+emial
+EMAIL
+username
+user
+users
+USER

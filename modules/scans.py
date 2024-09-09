@@ -38,28 +38,39 @@ def inject(url, driver, response, wordlist, payload, delay):
     email_elements = []
     password_elements = []
     # injection queue
-    num = 1
+    num = 0
     # Get the URL from the webdriver
     driver.get(url)
-    driver.implicitly_wait(3)
+    
     
 
     try:
-        # Find elements by ID and NAME for password inputs
-        pwdel_id = driver.find_elements(By.ID, 'password')
-        pwdel_name = driver.find_elements(By.NAME, 'password')
-        pwdel_type = driver.find_elements(By.XPATH, '//*[@type="password"]')
+        # # Find elements by ID and NAME for password inputs
+         # Open the file and read each line into a list
+        with open("data/PassSelectors.txt", 'r') as f:
+            selectors = [line.strip() for line in f.readlines()]
 
-        # Append the WebElement objects to the list
-        password_elements.extend(pwdel_id)
-        password_elements.extend(pwdel_name)
-        password_elements.extend(pwdel_type)
+        # Loop through selectors and attempt to find elements
+        # selector list is in data/PassSelectors.txt
+        for selector in selectors:
+            try:
+                # Check if it's an XPATH expression
+                if selector.startswith('//*[@'):
+                    elements = driver.find_elements(By.XPATH, selector)
+                else:
+                    elements = driver.find_elements(By.NAME, selector)
+                    elements = driver.find_elements(By.ID, selector)
 
-        # Remove duplicates by converting to a set and then back to a list
+                if elements:
+                    password_elements.extend(elements)
+                
+            except Exception as e:
+                print(f"Error finding elements for selector {selector}: {e}")
+            # Remove duplicates by converting to a set and then back to a list
         password_elements = list(set(password_elements))
 
     except Exception as e:
-        print(f"An error occurred: {e}")
+            print(f"An error occurred: {e}")
 
     try:
         # Find elements by ID and NAME for email inputs
@@ -142,35 +153,28 @@ def inject(url, driver, response, wordlist, payload, delay):
                 # Press Enter after filling out the forms
                 password_elements[0].send_keys(Keys.RETURN)
 
-                # Wait for the page to potentially redirect
-               
-
-                # Check if the URL has changed (indicating a redirect)
-                current_url = driver.current_url
-                
-                if current_url != url:
-                    print("⟪                                               ⟫")
-                    print("⟪===============================================⟫ ")
-                    print("⟪                                               ⟫")
-                    print(f"⟪ Redirection:                                  ⟫")
-                    print("⟪                                               ⟫")
-                    print(f"⟪ {current_url}           ⟫")
-                    if current_url != "": 
-                        print("⟪                                               ⟫")
-                        print(create_box_line(f"Injection: {Fore.GREEN + 'Successful' + Fore.RESET}", 59, "left"))
-                        save_to_json(url, num)
-                        print("⟪                                               ⟫")
-                    else:
-                        print(create_box_line(f"Injection: {Fore.RED + 'Failure :(' + Fore.RESET}", 49, "left"))
-                        
-                    return  # Exit the function if redirected
-                
             except Exception as e:
                 pass
-
-
+                
     
-                        
+    # Wait for the page to potentially redirect
+    # Check if the URL has changed (indicating a redirect)
+    current_url = driver.current_url
+    
+    if current_url != url:
+        print("⟪                                               ⟫")
+        print("⟪===============================================⟫ ")
+        print("⟪                                               ⟫")
+        print(f"⟪ Redirection:                                  ⟫")
+        print("⟪                                               ⟫")
+        print(f"⟪ {current_url}           ⟫")
+        if current_url != "": 
+            print("⟪                                               ⟫")
+            print(create_box_line(f"Injection: {Fore.GREEN + 'Successful' + Fore.RESET}", 59, "left"))
+            save_to_json(url, num)
+            print("⟪                                               ⟫")
+        else:
+            print(create_box_line(f"Injection: {Fore.RED + 'Failure :(' + Fore.RESET}", 49, "left"))           
     # Keep the browser open for 10 seconds before closing
     time.sleep(10)
     

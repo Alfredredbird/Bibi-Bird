@@ -1,0 +1,12 @@
+password
+Password
+pass
+Pass
+pswd
+PSWD
+//*[@type="password"]
+//*[@type="Password"]
+//*[@type="pass"]
+//*[@type="Pass"]
+//*[@type="pswd"]
+//*[@type="PSWD"]
