@@ -73,26 +73,28 @@ def inject(url, driver, response, wordlist, payload, delay):
             print(f"An error occurred: {e}")
 
     try:
-        # Find elements by ID and NAME for email inputs
-        input_id = driver.find_elements(By.ID, 'email')
-        input_name = driver.find_elements(By.NAME, 'email')
+        # same as code above but for emails ^
+        with open("data/EmailSelectors.txt", 'r') as f:
+                Eselectors = [line.strip() for line in f.readlines()]
 
-        # Append the WebElement objects to the list
-        email_elements.extend(input_id)
-        email_elements.extend(input_name)
+        # Loop through selectors and attempt to find elements
+        # selector list is in data/PassSelectors.txt
+        for selector in Eselectors:
+            try:
+                # Check if it's an XPATH expression
+                if selector.startswith('//*[@'):
+                    elements = driver.find_elements(By.XPATH, selector)
+                else:
+                    elements = driver.find_elements(By.NAME, selector)
+                    elements = driver.find_elements(By.ID, selector)
 
-        # Remove duplicates by converting to a set and then back to a list
+                if elements:
+                    email_elements.extend(elements)
+                
+            except Exception as e:
+                print(f"Error finding elements for selector {selector}: {e}")
+            # Remove duplicates by converting to a set and then back to a list
         email_elements = list(set(email_elements))
-
-        # If no elements found, look for any input elements
-        if not email_elements:
-            input_all = driver.find_elements(By.TAG_NAME, 'input')
-            tagarea = driver.find_elements(By.TAG_NAME, 'textarea')
-            txtname = driver.find_elements(By.TAG_NAME, 'txtManualName')
-            email_elements.extend(input_all)
-            email_elements.extend(tagarea)
-            email_elements.extend(txtname)
-
     except Exception as e:
         print(f"An error occurred: {e}")
 
@@ -103,7 +105,7 @@ def inject(url, driver, response, wordlist, payload, delay):
 
     # Call the logo function
     logo(url, response, count, pwd)
-          
+    # reading and deciding the payloads
     if payload == 1 or payload == 0:
       if payload == 0:
             print(f"⟪ {Fore.RED + "Using Defualt Wordlist" + Fore.RESET}                        ⟫")

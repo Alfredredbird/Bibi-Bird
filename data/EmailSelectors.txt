@@ -8,3 +8,4 @@ username
 user
 users
 USER
+email
