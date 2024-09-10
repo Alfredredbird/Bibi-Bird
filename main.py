@@ -23,7 +23,7 @@ parser.add_argument('-w', '--wordlist')
 parser.add_argument('-i', '--inject', action='store_true', help='SQL Injection Mode')
 parser.add_argument('-p', '--payload', type=int)
 parser.add_argument('-d', '--delay', type=int)
-
+parser.add_argument('-x', '--xss', action='store_true')
 
 arg = parser.parse_args()
 
