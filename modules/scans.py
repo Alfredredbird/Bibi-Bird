@@ -237,39 +237,42 @@ def handle_alert(driver):
         # No alert to handle
         pass
 
-def xssScan(driver, url):
-    input_elements = []
-    print("⟪===============================================⟫")
-    print("⟪                                               ⟫")
-    print("⟪ Scanning For XSS In URL:                      ⟫")
-    print("⟪                                               ⟫")
-    
-    with open('dict/xss-common.txt', 'r') as f:
-          xss_payloads = f.readlines()
-    
-    param_name = "q"
-    for payload in xss_payloads:
-        # Construct the vulnerable URL by injecting payload into the parameter
-        vulnerable_url = f"{url}{param_name}={payload}"
-        
-        # Open the URL in the browser
-        print(create_box_line(f"{param_name}={payload}", 49, "left"))
-        try:
-            driver.get(vulnerable_url)
-            time.sleep(2)  # Wait for the page to load
-            
-            # Handle any unexpected alerts
-            handle_alert(driver)
-            
-            # Check if the payload is reflected in the page source
-            page_source = driver.page_source
-            if payload in page_source:
-                print(00)
-            else:
-                pass
-        
-        except UnexpectedAlertPresentException:
-            # Handle the alert if it interrupts the execution
-          handle_alert(driver)
+def xssScan(driver, url,mode=1):
+
+    if mode == 1:
+     input_elements = []
+     print("⟪===============================================⟫")
+     print("⟪                                               ⟫")
+     print("⟪ Scanning For XSS In URL:                      ⟫")
+     print("⟪                                               ⟫")
+     
+     with open('dict/xss-common.txt', 'r') as f:
+           xss_payloads = f.readlines()
+     
+     param_name = "q"
+     for payload in xss_payloads:
+         # Construct the vulnerable URL by injecting payload into the parameter
+         vulnerable_url = f"{url}{param_name}={payload}"
+         
+         
+         # Open the URL in the browser
+         print(create_box_line(f"{param_name}={payload.strip('\n')}", 49, "left"))
+         try:
+             driver.get(vulnerable_url)
+             time.sleep(2)  # Wait for the page to load
+             
+             # Handle any unexpected alerts
+             handle_alert(driver)
+             
+             # Check if the payload is reflected in the page source
+             page_source = driver.page_source
+             if payload in page_source:
+                 print(00)
+             else:
+                 pass
+         
+         except UnexpectedAlertPresentException:
+             # Handle the alert if it interrupts the execution
+           handle_alert(driver)
         
         

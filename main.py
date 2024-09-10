@@ -23,7 +23,7 @@ parser.add_argument('-w', '--wordlist')
 parser.add_argument('-i', '--inject', action='store_true', help='SQL Injection Mode')
 parser.add_argument('-p', '--payload', type=int)
 parser.add_argument('-d', '--delay', type=int)
-parser.add_argument('-x', '--xss', action='store_true')
+parser.add_argument('-x', '--xss', type=int)
 
 arg = parser.parse_args()
 
@@ -60,6 +60,9 @@ if arg.payload:
 
 if arg.delay:
     delay = arg.delay
+if arg.xss:
+   mode = arg.xss
+
 
 if arg.wordlist:
  if arg.wordlist is None:
@@ -87,7 +90,7 @@ else:
    if arg.inject:
        inject(url,driver,response,wordlistpath,payload,delay)
    if arg.xss:
-       xssScan(driver,url)
+       xssScan(driver,url,mode)
         
 print("⟪                                               ⟫")
 print("⟪±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±⟫")

@@ -50,7 +50,7 @@ def logo(url,response, count=0, pwd=0):
 ⟪                                               ⟫ 
 ⟪===============================================⟫ 
 ⟪                                               ⟫ 
-⟪ Target: {url}    ⟫
+⟪ Target: {url}  ⟫
 ⟪                                               ⟫ """)
     
     
