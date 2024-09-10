@@ -6,6 +6,7 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.keys import Keys
+from selenium.common.exceptions import UnexpectedAlertPresentException, NoAlertPresentException
 from bs4 import BeautifulSoup
 from modules.mods import *
 import requests
@@ -221,4 +222,54 @@ def subdomain(url, driver, wordlist):
         except Exception as e:
             print(f"Error accessing {newurl}: {e}")
 
+# Function to handle alerts and continue
+def handle_alert(driver):
+    try:
+        # Switch to the alert and accept it
+        alert = driver.switch_to.alert
+        print("⟪                                               ⟫")
+        print("⟪===============================================⟫")
+        print("⟪                                               ⟫")
+        print(f"⟪ Alert detected: {alert.text}                             ⟫")
+        print("⟪                                               ⟫")
+        alert.accept()
+    except NoAlertPresentException:
+        # No alert to handle
+        pass
+
+def xssScan(driver, url):
+    input_elements = []
+    print("⟪===============================================⟫")
+    print("⟪                                               ⟫")
+    print("⟪ Scanning For XSS In URL:                      ⟫")
+    print("⟪                                               ⟫")
+    
+    with open('dict/xss-common.txt', 'r') as f:
+          xss_payloads = f.readlines()
+    
+    param_name = "q"
+    for payload in xss_payloads:
+        # Construct the vulnerable URL by injecting payload into the parameter
+        vulnerable_url = f"{url}{param_name}={payload}"
+        
+        # Open the URL in the browser
+        print(create_box_line(f"{param_name}={payload}", 49, "left"))
+        try:
+            driver.get(vulnerable_url)
+            time.sleep(2)  # Wait for the page to load
+            
+            # Handle any unexpected alerts
+            handle_alert(driver)
+            
+            # Check if the payload is reflected in the page source
+            page_source = driver.page_source
+            if payload in page_source:
+                print(00)
+            else:
+                pass
+        
+        except UnexpectedAlertPresentException:
+            # Handle the alert if it interrupts the execution
+          handle_alert(driver)
+        
         

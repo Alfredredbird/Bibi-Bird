@@ -86,4 +86,8 @@ else:
     subdomain(url,driver, "dict/sec.txt")
    if arg.inject:
        inject(url,driver,response,wordlistpath,payload,delay)
+   if arg.xss:
+       xssScan(driver,url)
         
+print("⟪                                               ⟫")
+print("⟪±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±⟫")
