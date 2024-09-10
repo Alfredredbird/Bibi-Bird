@@ -61,7 +61,9 @@ def logo(url,response, count=0, pwd=0):
       
     print("""⟪                                               ⟫  """)
     if count >= 1:
-      print(f"""⟪ Input Elements: {count}                             ⟫""")
+      print(f"""⟪ Input Elements: {count+pwd}                             ⟫""")
+      print("⟪                                               ⟫")
+      print(f"""⟪ Email Elements: {count}                             ⟫""")
       print("⟪                                               ⟫")
     if pwd >= 1:
       print(f"""⟪ Password Elements: {pwd}                          ⟫  
