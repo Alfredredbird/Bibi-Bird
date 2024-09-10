@@ -69,7 +69,13 @@ if arg.wordlist:
  else:
     wordlistpath = arg.wordlist
 
-response = requests.get(str(url), headers=headers)
+try:
+ response = requests.get(str(url), headers=headers)
+except Exception as e:
+   print("================================================")
+   print(f"Error: {e}")
+   print("================================================")
+   exit(1)
 
 logo(url,response)
 
