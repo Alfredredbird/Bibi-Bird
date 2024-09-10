@@ -31,7 +31,7 @@ arg = parser.parse_args()
 
 chrome_options = Options()
 
-# chrome_options.add_argument("--headless")   
+chrome_options.add_argument("--headless")   
 chrome_options.add_argument("--no-sandbox")
 chrome_options.add_argument("--disable-dev-shm-usage")
 chrome_options.add_argument("--disable-software-rasterizer")
@@ -47,10 +47,8 @@ headers = {
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
     "Upgrade-Insecure-Requests": "1",
     "Referer": "https://www.google.com/",
-    "DNT": "1"  # Do Not Track request header
+    "DNT": "1"  
 }
-
-
 
 if arg.url is None:
     url = input("Target: ")

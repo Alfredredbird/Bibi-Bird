@@ -212,11 +212,11 @@ def subdomain(url, driver, wordlist):
         try:
             driver.get(newurl)
             domaincode = driver.page_source.strip()  # Strip whitespace from domain code
-            
+            print("⟪                                               ⟫")
             if homecode == domaincode:
-                print("Page is the same as the homepage.")
+                pass
             else:
-                print(f"Found: {newurl}")
+                print(create_box_line(f"{newurl}", 49, "left"))
                 
         except Exception as e:
             print(f"Error accessing {newurl}: {e}")
