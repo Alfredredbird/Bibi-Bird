@@ -3,7 +3,7 @@
 
 
 # 🔍 Overview
-Bibi Bird is a tool writen in python that tests websites for SQL Injections, XSS and other vulnerabilities.
+Bibi Bird is a tool writen in python that tests websites for SQL Injections, XSS and other vulnerabilities. My tool is still in beta but works 90% of the time.
 
 
 # 📦 Installation
@@ -137,6 +137,10 @@ Still Need Help? Contact Below :D
 - Twitter: https://twitter.com/alfredredbird1
 - LinkedIn: https://www.linkedin.com/in/jeffrey-montanari-7178a1290/
 
+# 🛠 Other Tools
 
+Other tools in the fleet:
+- Tookie-OSINT: http://github.com/alfredredbird/tookie-osint
+  
 # 🤝 Partnership
 Want to partner with the Bibi-Bird project? Feel free to reach out!
