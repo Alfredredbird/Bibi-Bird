@@ -285,6 +285,7 @@ def xssScan(driver, url,mode=1):
     # Find all input fields on the page
     inputs = driver.find_elements(By.TAG_NAME, 'input')
     inputCount = len(inputs)
+    workingCount = []
     
     print("⟪                                               ⟫")
     print("⟪===============================================⟫")
@@ -318,8 +319,12 @@ def xssScan(driver, url,mode=1):
                 # Check if the payload appears in the HTML
                 page_source = driver.page_source
                 if payload in page_source:
+                    # True
                     print(create_box_line(f" {payload.strip('\n')}", 49, "left"))
+                    workingCount.extend(payload)
+                    
                 else:
+                    # False
                     print(create_box_line(f" {payload.strip('\n')}", 49, "left"))
                 
             except Exception as e:
@@ -337,3 +342,4 @@ def xssScan(driver, url,mode=1):
                     print(f"⟪ {Fore.RED + 'Error!' + Fore.RESET} Can't Interact With Element!           ⟫")
                     return 1
             
+    print(f"Working Payloads: {len(workingCount)}")        
