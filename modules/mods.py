@@ -44,7 +44,9 @@ def logo(url,response, count=0, pwd=0):
 ⟪                                               ⟫ 
 ⟪ OS:{platform.system()}                   Machine: {platform.machine()}   ⟫
 ⟪                                               ⟫                                            
-⟪ Hostname: {socket.gethostname()}        IP: {socket.gethostbyname(socket.gethostname())} ⟫
+⟪ Hostname: {socket.gethostname()}                  ⟫
+⟪                                               ⟫ 
+⟪ IP: {socket.gethostbyname(socket.gethostname())}                            ⟫ 
 ⟪                                               ⟫ 
 ⟪ Python Version: {Fore.YELLOW + python_version + Fore.RESET}                        ⟫ 
 ⟪                                               ⟫ 

@@ -239,7 +239,7 @@ def handle_alert(driver):
 
 def xssScan(driver, url,mode=1):
 
-    if mode == 1:
+  if mode == 1:
      input_elements = []
      print("⟪===============================================⟫")
      print("⟪                                               ⟫")
@@ -274,5 +274,66 @@ def xssScan(driver, url,mode=1):
          except UnexpectedAlertPresentException:
              # Handle the alert if it interrupts the execution
            handle_alert(driver)
+    
+  if mode == 2:
         
+    driver.get(url)
+    time.sleep(2)  # Wait for page to load
+    with open('dict/xss-common.txt', 'r') as f:
+        xss_payloads = f.readlines()
+
+    # Find all input fields on the page
+    inputs = driver.find_elements(By.TAG_NAME, 'input')
+    inputCount = len(inputs)
+    
+    print("⟪                                               ⟫")
+    print("⟪===============================================⟫")
+    print("⟪                                               ⟫")
+    print(f"⟪ Input Fields: {inputCount}                               ⟫")
+    print("⟪                                               ⟫")
+    # color based on payload count
+    if len(xss_payloads) <= 8:
+        print(f"⟪ Payloads Loaded: {Fore.RED + str(len(xss_payloads)) + Fore.RESET}                            ⟫")
+    if len(xss_payloads) >= 8 and len(xss_payloads) <= 16:
+        print(f"⟪ Payloads Loaded: {Fore.YELLOW + str(len(xss_payloads)) + Fore.RESET}                            ⟫")
+    if len(xss_payloads) >= 17:
+        print(f"⟪ Payloads Loaded: {Fore.GREEN + str(len(xss_payloads)) + Fore.RESET}                          ⟫")
         
+    print("⟪                                               ⟫")
+    print("⟪===============================================⟫")
+    print("⟪                                               ⟫")
+    print("⟪ Payload Queue:                                ⟫")
+    print("⟪                                               ⟫")
+
+    # Inject payloads into all input fields
+    for payload in xss_payloads:
+        for input_field in inputs:
+            try:
+                input_field.clear()  # Clear the field
+                input_field.send_keys(payload)  # Inject XSS payload
+                input_field.send_keys(Keys.RETURN)  # Submit the form or move to the next
+                
+                time.sleep(2)  # Allow page to reload if necessary
+                
+                # Check if the payload appears in the HTML
+                page_source = driver.page_source
+                if payload in page_source:
+                    print(create_box_line(f" {payload.strip('\n')}", 49, "left"))
+                else:
+                    print(create_box_line(f" {payload.strip('\n')}", 49, "left"))
+                
+            except Exception as e:
+                # Check if an alert is present
+                try:
+                    alert = driver.switch_to.alert
+                    print("⟪                                               ⟫")
+                    print(create_box_line(f" {payload.strip('\n')}", 49, "left"))
+                    alert.accept()  # Dismiss the alert
+                    
+                except:
+                    print("⟪                                               ⟫")
+                    print("⟪===============================================⟫")
+                    print("⟪                                               ⟫")
+                    print(f"⟪ {Fore.RED + 'Error!' + Fore.RESET} Can't Interact With Element!           ⟫")
+                    return 1
+            
