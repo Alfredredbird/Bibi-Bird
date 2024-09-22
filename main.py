@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 import argparse
 from modules.scans import *
 from modules.mods import *
-
+from modules.bireq import *
 # Variables á••( á› )á•—
 url = ""
 wordlistpath = ""
@@ -24,6 +24,8 @@ parser.add_argument('-i', '--inject', action='store_true', help='SQL Injection M
 parser.add_argument('-p', '--payload', type=int)
 parser.add_argument('-d', '--delay', type=int)
 parser.add_argument('-x', '--xss', type=int)
+parser.add_argument('-r', '--repeat', type=int)
+parser.add_argument('-c', '--csrf', type=str, help='Cross Site Request Forgery Mode')
 
 arg = parser.parse_args()
 
@@ -31,7 +33,7 @@ arg = parser.parse_args()
 
 chrome_options = Options()
 
-# chrome_options.add_argument("--headless")   
+chrome_options.add_argument("--headless")   
 chrome_options.add_argument("--no-sandbox")
 chrome_options.add_argument("--disable-dev-shm-usage")
 chrome_options.add_argument("--disable-software-rasterizer")
@@ -50,7 +52,7 @@ headers = {
     "DNT": "1"  
 }
 
-if arg.url is None:
+if arg.url is None and arg.csrf is None:
     url = input("Target: ")
 else:
     url = arg.url
@@ -71,7 +73,10 @@ if arg.wordlist:
     wordlistpath = arg.wordlist
 
 try:
- response = requests.get(str(url), headers=headers)
+ if url is not None:
+    response = requests.get(str(url), headers=headers)
+ else: 
+    pass
 except Exception as e:
    print("================================================")
    print(f"Error: {e}")
@@ -91,6 +96,12 @@ else:
        inject(url,driver,response,wordlistpath,payload,delay)
    if arg.xss:
        xssScan(driver,url,mode)
-        
+   if arg.csrf:
+      if arg.repeat is None:
+        repeat_count = int(input("Enter the number of times to repeat the request: "))  # User-defined repeat count
+      else:
+         repeat_count = arg.repeat
+      send_repeated_requests(arg.csrf, repeat_count, url)
+
 print("⟪                                               ⟫")
 print("⟪±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±⟫")

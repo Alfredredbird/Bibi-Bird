@@ -13,7 +13,7 @@ def load_values(file_path):
     with open(file_path, 'r') as file:
         return [line.strip() for line in file.readlines()]
 
-def analyze_request_file(request_file, values_file):
+def analyze_request_file(request_file, values_file,inturl):
     # Load keys to search for
     search_keys = load_values(values_file)
 
@@ -36,7 +36,8 @@ def analyze_request_file(request_file, values_file):
 
     # Ensure the URL has a scheme
     if not url.startswith(('http://', 'https://')):
-        url = 'http://192.168.12.146:3000' + url  # Update the host as needed
+        # add the url some how later
+        url = inturl + url  # Update the host as needed
 
     # Parse headers
     headers = {}
@@ -103,9 +104,10 @@ def random_string(length=8, char_set=string.ascii_letters + string.digits):
     """Generate a random string of fixed length from the specified character set."""
     return ''.join(random.choice(char_set) for i in range(length))
 
-def send_repeated_requests(request_file, values_file, repeat_count):
+def send_repeated_requests(request_file, repeat_count,inturl):
+    values_file = 'data/values.txt'  # Path to the file containing keys to search for
     """Send a modified request multiple times, with optional brute-forcing."""
-    request_details = analyze_request_file(request_file, values_file)
+    request_details = analyze_request_file(request_file, values_file,inturl)
     
     if not request_details:
         print("No valid request details found. Exiting.")
@@ -178,9 +180,9 @@ def send_repeated_requests(request_file, values_file, repeat_count):
         except requests.RequestException as e:
             print(f"Request {i + 1} failed: {e}")
 
-# Example usage
-request_file = 'request.txt'  # Path to your file containing the HTTP request data
-values_file = 'values.txt'  # Path to the file containing keys to search for
-repeat_count = int(input("Enter the number of times to repeat the request: "))  # User-defined repeat count
+# Example usage for if i forget (probably will)
+# request_file = 'request.txt'  # Path to your file containing the HTTP request data
+# values_file = 'values.txt'  # Path to the file containing keys to search for
+# repeat_count = int(input("Enter the number of times to repeat the request: "))  # User-defined repeat count
 
-send_repeated_requests(request_file, values_file, repeat_count)
+# send_repeated_requests(request_file, values_file, repeat_count)
