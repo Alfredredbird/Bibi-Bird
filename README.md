@@ -110,6 +110,7 @@ There Is A Lot Lol
  - [ ] Custom Wordlists
  - [ ] Payload Generation
  - [X] Payload Selection
+ - [X] CSRF Attacks (beta)
 
 # ⁉️ Need Help?
 Check out https://github.com/alfredredbird/Bibi-Bird/issues or the WiKi for help.
