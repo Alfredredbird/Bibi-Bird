@@ -3,3 +3,4 @@ passwordRepeat
 email
 Email
 securityQuestion
+quantity
