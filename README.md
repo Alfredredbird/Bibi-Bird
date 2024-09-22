@@ -105,7 +105,7 @@ There Is A Lot Lol
  - [ ] DNS Scanning
  - [ ] URL Brute Forcing
  - [ ] Reports
- - [ ] XSS Injecting
+ - [X] XSS Injecting
  - [ ] Site OSINT
  - [ ] Custom Wordlists
  - [ ] Payload Generation
