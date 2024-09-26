@@ -146,4 +146,6 @@ Other tools in the fleet:
 # 🤝 Partnership
 Want to partner with the Bibi-Bird project? Feel free to reach out!
 
-  Mrofcodyx - [Git-eXpossed](https://github.com/mrofcodyx/Git-eXposed)
+  partners:
+
+    Mrofcodyx - [Git-eXpossed](https://github.com/mrofcodyx/Git-eXposed)
