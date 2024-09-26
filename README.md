@@ -148,4 +148,4 @@ Want to partner with the Bibi-Bird project? Feel free to reach out!
 
   partners:
 
-    Mrofcodyx - [Git-eXpossed](https://github.com/mrofcodyx/Git-eXposed)
+  ~ Mrofcodyx - [Git-eXpossed](https://github.com/mrofcodyx/Git-eXposed)
