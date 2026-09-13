@@ -3,6 +3,7 @@ import json
 import requests
 import random
 import string
+from urllib.parse import urljoin
 from modules.mods import *
 ################################################################
 #
@@ -39,11 +40,16 @@ def analyze_request_file(request_file, values_file, inturl):
 
     # Parse request line (e.g., "POST /api/Users/ HTTP/1.1")
     request_line = header_lines[0]
-    method, url, http_version = request_line.split()
+    parts = request_line.split()
+    if len(parts) < 2:
+        print("⟪ Invalid request line format in request file. ⟫")
+        return None
+    method = parts[0]
+    url = parts[1]
 
     # Ensure the URL has a scheme
     if not url.startswith(('http://', 'https://')):
-        url = inturl + url  # Update the host as needed
+        url = urljoin(inturl.rstrip('/') + '/', url.lstrip('/'))
 
     # Parse headers
     headers = {}
@@ -55,7 +61,8 @@ def analyze_request_file(request_file, values_file, inturl):
 
     # Try to parse body as JSON if content type indicates JSON
     body_data = None
-    if body_part and headers.get('Content-Type') == 'application/json':
+    content_type = headers.get('Content-Type', '').lower()
+    if body_part and 'application/json' in content_type:
         try:
             body_data = json.loads(body_part)
         except json.JSONDecodeError:
@@ -210,4 +217,3 @@ def send_repeated_requests(request_file, repeat_count, inturl):
             print(f"⟪ Response {i + 1} Body:", response.text)
         except requests.RequestException as e:
             print(f"⟪ Request {i + 1} failed: {e}")
-

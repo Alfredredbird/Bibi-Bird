@@ -1,18 +1,19 @@
-
+<div align=center>
+    
 ![bibi-bird-480-text](https://github.com/user-attachments/assets/a0836bfa-6012-4502-b891-2416222bb0f2)
+</div>
 
-
-# 🔍 Overview
+#  Overview
 Bibi Bird is a tool writen in python that tests websites for SQL Injections, XSS and other vulnerabilities. My tool is still in beta but works 90% of the time.
 
 
-# 📦 Installation
+# Installation
 
     git clone https://github.com/alfredredbird/Bibi-Bird
     cd Bibi-Bird && sudo pip3 install -r requirements.txt
     python3 main.py
 
-# 📦 Manual Install
+# Manual Install
 
     download the latest release from: https://github.com/alfredredbird/Bibi-Bird/releases.
     then extract the zip or tar.gz
@@ -20,8 +21,17 @@ Bibi Bird is a tool writen in python that tests websites for SQL Injections, XSS
     cd Bibi-Bird && sudo pip3 install -r requirements.txt
     python3 Bibi-Bird
 
+# CLI Modes
 
-# 💻 Tested OS
+- SQL injection mode: `python3 main.py -u https://target.tld/login -i`
+- SQL injection with custom wordlist: `python3 main.py -u https://target.tld/login -i -w dict/sql-common.txt`
+- SQL error detection mode: `python3 main.py -u https://target.tld/page --sql-detect`
+- XSS URL mode: `python3 main.py -u "https://target.tld/search?" -x 1`
+- XSS form mode: `python3 main.py -u https://target.tld/login -x 2`
+- CSRF request replay mode: `python3 main.py -u https://target.tld -c tests/request.txt -r 25`
+- Save report output: `python3 main.py -u https://target.tld -i --report data/report.json`
+
+# Tested OS
 
 <table>
     <tr>
@@ -74,7 +84,7 @@ Bibi Bird is a tool writen in python that tests websites for SQL Injections, XSS
     </tr>
 </table>
 
-# 📖 Requirements
+# Requirements
 
 There Is A Lot Lol
 
@@ -84,8 +94,8 @@ There Is A Lot Lol
 - alive_progress
 - bs4
 
-# 🗣️Supported Languages
-(we need translators 😭)
+# Supported Languages
+>(we need translators)
 - [x] English
 - [ ] Italian
 - [ ] Hebrew 
@@ -97,26 +107,26 @@ There Is A Lot Lol
 - [ ] Russian
 - [ ] Portuguese
 
-# 📕 Upcoming Features
+# Upcoming Features
  (They Are Great First Issues :D)
 
  - [x] SQL Injections
- - [ ] SQL Detections
+ - [x] SQL Detections
  - [ ] DNS Scanning
  - [ ] URL Brute Forcing
- - [ ] Reports
+ - [x] Reports
  - [X] XSS Injecting
  - [ ] Site OSINT
- - [ ] Custom Wordlists
+ - [x] Custom Wordlists
  - [ ] Payload Generation
  - [X] Payload Selection
  - [X] CSRF Attacks (beta)
 
-# ⁉️ Need Help?
-Check out https://github.com/alfredredbird/Bibi-Bird/issues or the WiKi for help.
+# Need Help?
+Check out [Bibi-Bird/issues](https://github.com/alfredredbird/Bibi-Bird/issues) or the WiKi for help.
 Still Need Help? Contact Below :D
 
-# 📗 Info:
+# Info:
 
 <table>
     <tr>
@@ -133,17 +143,17 @@ Still Need Help? Contact Below :D
     </tr>
 </table>
 
-# 📘 Contact
+# Contact
 
-- Twitter: https://twitter.com/alfredredbird1
-- LinkedIn: https://www.linkedin.com/in/jeffrey-montanari-7178a1290/
+- Twitter: [alfredredbird1](https://twitter.com/alfredredbird1)
+- LinkedIn: [jeffrey montanari](https://www.linkedin.com/in/jeffrey-montanari-7178a1290)
 
-# 🛠 Other Tools
+# Other Tools
 
 Other tools in the fleet:
-- Tookie-OSINT: http://github.com/alfredredbird/tookie-osint
+- Tookie-OSINT: [Tookie-OSINT](http://github.com/alfredredbird/tookie-osint)
   
-# 🤝 Partnership
+# Partnership
 Want to partner with the Bibi-Bird project? Feel free to reach out!
 
   partners:
